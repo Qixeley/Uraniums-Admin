@@ -1,0 +1,107 @@
+-- Create the ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "AdminCommandBarGui"
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create the main frame for the command bar
+local commandFrame = Instance.new("Frame")
+commandFrame.Size = UDim2.new(0.3, 0, 0.07, 0) -- Height set slightly larger
+commandFrame.Position = UDim2.new(0.35, 0, 0.9, -60) -- Positioned above the hotbar
+commandFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40) -- Darker background color
+commandFrame.BackgroundTransparency = 0 -- No transparency for the main frame
+commandFrame.BorderSizePixel = 0 -- No border
+commandFrame.Parent = screenGui
+
+-- Add rounded corners to the frame
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10) -- Rounded corner with a radius of 10
+corner.Parent = commandFrame
+
+-- Create the TextBox for command input
+local commandBox = Instance.new("TextBox")
+commandBox.Size = UDim2.new(1, -10, 1, 0) -- Fits inside the frame
+commandBox.Position = UDim2.new(0, 5, 0, 0) -- Padding from the left
+commandBox.BackgroundTransparency = 1 -- Fully transparent textbox
+commandBox.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text color
+commandBox.Text = "" -- Start with an empty text box
+commandBox.PlaceholderText = "Enter Command..." -- Placeholder text for modern UI
+commandBox.PlaceholderColor3 = Color3.fromRGB(180, 180, 180) -- Lighter placeholder color
+commandBox.ClearTextOnFocus = true -- Clear the text when clicked
+commandBox.Font = Enum.Font.Gotham -- Sleek font
+commandBox.TextSize = 18 -- Font size for a modern look
+commandBox.Parent = commandFrame
+
+-- Add rounded corners to the TextBox
+local boxCorner = Instance.new("UICorner")
+boxCorner.CornerRadius = UDim.new(0, 8) -- Rounded corners with radius 8
+boxCorner.Parent = commandBox
+
+-- Variables to manage infinite jump state, walking speed, jump power, and gravity
+local infiniteJumpEnabled = false
+local defaultWalkSpeed = 16 -- Default walk speed
+local defaultJumpPower = 50 -- Default jump power
+local defaultGravity = 196.2 -- Default gravity in Roblox
+local player = game.Players.LocalPlayer
+local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+humanoid.WalkSpeed = defaultWalkSpeed -- Set the default walk speed
+humanoid.JumpPower = defaultJumpPower -- Set the default jump power
+workspace.Gravity = defaultGravity -- Set the default gravity
+
+-- Function to handle commands
+local function handleCommand(command)
+    command = command:lower() -- Convert command to lowercase
+    local character = player.Character
+    humanoid = character and character:FindFirstChild("Humanoid")
+
+    -- Command handling
+    if command == "sit" and humanoid then
+        humanoid.Sit = true
+    elseif command == "unsit" and humanoid then
+        humanoid.Sit = false
+    elseif command == "infinitejump" or command == "infjump" then
+        infiniteJumpEnabled = true -- Enable infinite jump
+        print("Infinite Jump Enabled")
+    elseif command == "uninfjump" or command == "uninfinitejump" then
+        infiniteJumpEnabled = false -- Disable infinite jump
+        print("Infinite Jump Disabled")
+    elseif command:match("^speed%s*(%d+)$") or command:match("^walkspeed%s*(%d+)$") or command:match("^ws%s*(%d+)$") then
+        local speedValue = tonumber(command:match("(%d+)")) -- Extract numeric value
+        if speedValue and humanoid then
+            humanoid.WalkSpeed = speedValue -- Set the walk speed to the value entered
+            print("WalkSpeed set to: " .. speedValue)
+        end
+    elseif command:match("^jumppower%s*(%d+)$") or command:match("^jp%s*(%d+)$") then
+        local jumpPowerValue = tonumber(command:match("(%d+)")) -- Extract numeric value
+        if jumpPowerValue and humanoid then
+            humanoid.JumpPower = jumpPowerValue -- Set the jump power to the value entered
+            print("JumpPower set to: " .. jumpPowerValue)
+        end
+    elseif command:match("^gravity%s*(-?%d+%.?%d*)$") then
+        local gravityValue = tonumber(command:match("(-?%d+%.?%d*)")) -- Extract numeric value
+        if gravityValue then
+            workspace.Gravity = gravityValue -- Set the gravity to the value entered
+            print("Gravity set to: " .. gravityValue)
+        end
+    else
+        print("Command not recognized.")
+    end
+end
+
+-- Function to handle command input when Enter is pressed
+commandBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then -- Check if Enter key was pressed
+        local command = commandBox.Text
+        handleCommand(command) -- Process the command
+        commandBox.Text = "" -- Clear the textbox after submitting the command
+    end
+end)
+
+-- Infinite jump logic
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if infiniteJumpEnabled then
+        local character = player.Character
+        if character and character:FindFirstChild("Humanoid") then
+            character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
