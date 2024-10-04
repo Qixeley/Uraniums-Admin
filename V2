@@ -1,0 +1,134 @@
+local screenGui = Instance.new("ScreenGui")
+local cmdBarFrame = Instance.new("Frame")
+local cmdTextBox = Instance.new("TextBox")
+local cmdLabel = Instance.new("TextLabel")
+local uiCorner = Instance.new("UICorner") -- For rounded edges
+local cmdListFrame = Instance.new("Frame") -- Frame for command list
+local cmdListLabel = Instance.new("TextLabel") -- Label for command list
+local closeButton = Instance.new("TextButton") -- Button to close the command list
+
+-- Parent the ScreenGui to the player's PlayerGui
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Set up the command bar frame
+cmdBarFrame.Parent = screenGui
+cmdBarFrame.Size = UDim2.new(0.25, 0, 0.07, 0) -- Size: 25% width, 7% height
+cmdBarFrame.Position = UDim2.new(0.375, 0, 0.70, 0) -- Moved up slightly
+cmdBarFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
+cmdBarFrame.BorderSizePixel = 0
+cmdBarFrame.BackgroundTransparency = 0.3 -- Slightly transparent
+
+-- Rounded edges for the command bar
+uiCorner.Parent = cmdBarFrame
+uiCorner.CornerRadius = UDim.new(0, 4) -- Slightly round edges
+
+-- Set up the "›" label
+cmdLabel.Parent = cmdBarFrame
+cmdLabel.Size = UDim2.new(0.1, 0, 1, 0) -- Small space for the symbol on the left
+cmdLabel.Position = UDim2.new(0.02, 0, 0, 0) -- Position in the middle
+cmdLabel.Text = "›"
+cmdLabel.TextColor3 = Color3.fromRGB(200, 200, 200) -- Light gray text
+cmdLabel.BackgroundTransparency = 1 -- No background
+cmdLabel.Font = Enum.Font.SourceSans -- Use a clear font
+cmdLabel.TextSize = 14 -- Font size
+
+-- Set up the command text box
+cmdTextBox.Parent = cmdBarFrame
+cmdTextBox.Size = UDim2.new(0.85, 0, 1, 0) -- Fill the rest of the frame after the "›"
+cmdTextBox.Position = UDim2.new(0.1, 0, 0, 0) -- Placed next to the "›"
+cmdTextBox.Text = ""
+cmdTextBox.TextColor3 = Color3.fromRGB(200, 200, 200) -- Light gray text
+cmdTextBox.BackgroundTransparency = 1 -- No background
+cmdTextBox.ClearTextOnFocus = true -- Clear text when clicked
+cmdTextBox.Font = Enum.Font.SourceSans -- Use a clear font
+cmdTextBox.TextSize = 14 -- Font size
+cmdTextBox.TextXAlignment = Enum.TextXAlignment.Left -- Align the text to the left
+
+-- Set up the command list frame
+cmdListFrame.Parent = screenGui
+cmdListFrame.Size = UDim2.new(0.25, 0, 0.3, 0) -- Size: 25% width, 30% height
+cmdListFrame.Position = UDim2.new(0.375, 0, 0.4, 0) -- Position above the command bar
+cmdListFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
+cmdListFrame.BorderSizePixel = 0
+cmdListFrame.BackgroundTransparency = 0.3 -- Slightly transparent
+cmdListFrame.Visible = false -- Initially hidden
+
+-- Rounded edges for the command list frame
+local uiCornerList = Instance.new("UICorner")
+uiCornerList.Parent = cmdListFrame
+uiCornerList.CornerRadius = UDim.new(0, 4) -- Slightly round edges
+
+-- Set up the command list label
+cmdListLabel.Parent = cmdListFrame
+cmdListLabel.Size = UDim2.new(1, 0, 1, 0) -- Fill the entire frame
+cmdListLabel.Position = UDim2.new(0, 0, 0, 0)
+cmdListLabel.Text = "Commands:\n- sit\n- unsit\n- cmds/commands\n- speed/ws/walkspeed (value)\n- jumppower/jp (value)\n- gravity/grav (value)"
+cmdListLabel.TextColor3 = Color3.fromRGB(200, 200, 200) -- Light gray text
+cmdListLabel.BackgroundTransparency = 1 -- No background
+cmdListLabel.Font = Enum.Font.SourceSans -- Use a clear font
+cmdListLabel.TextSize = 14 -- Font size
+cmdListLabel.TextXAlignment = Enum.TextXAlignment.Left -- Align the text to the left
+cmdListLabel.TextYAlignment = Enum.TextYAlignment.Top -- Align the text to the top
+
+-- Set up the close button
+closeButton.Parent = cmdListFrame
+closeButton.Size = UDim2.new(0.1, 0, 0.1, 0) -- Small button in the top right corner
+closeButton.Position = UDim2.new(0.9, 0, 0, 0)
+closeButton.Text = "𝘅"
+closeButton.TextColor3 = Color3.fromRGB(200, 200, 200) -- Light gray text
+closeButton.BackgroundTransparency = 1 -- No background
+closeButton.Font = Enum.Font.SourceSans -- Use a clear font
+closeButton.TextSize = 14 -- Font size
+
+-- Function to handle command execution
+cmdTextBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local command = cmdTextBox.Text:lower() -- Convert command to lowercase for easier matching
+        local args = string.split(command, " ") -- Split command by spaces to extract value
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+        print("Executing command:", command) -- Replace with actual command execution logic
+
+        if args[1] == "sit" then
+            if humanoid then
+                humanoid.Sit = true -- Sit down
+            end
+        elseif args[1] == "unsit" then
+            if humanoid then
+                humanoid.Sit = false -- Stand up
+            end
+        elseif args[1] == "cmds" or args[1] == "commands" then
+            cmdListFrame.Visible = not cmdListFrame.Visible -- Toggle visibility
+        elseif (args[1] == "speed" or args[1] == "ws" or args[1] == "walkspeed") and args[2] then
+            local speedValue = tonumber(args[2])
+            if humanoid and speedValue then
+                humanoid.WalkSpeed = speedValue -- Set the walk speed
+                print("WalkSpeed set to", speedValue)
+            end
+        elseif (args[1] == "jumppower" or args[1] == "jp") and args[2] then
+            local jumpPowerValue = tonumber(args[2])
+            if humanoid and jumpPowerValue then
+                humanoid.JumpPower = jumpPowerValue -- Set the jump power
+                print("JumpPower set to", jumpPowerValue)
+            end
+        elseif (args[1] == "gravity" or args[1] == "grav") and args[2] then
+            local gravityValue = tonumber(args[2])
+            if gravityValue then
+                workspace.Gravity = gravityValue -- Set the game's gravity
+                print("Gravity set to", gravityValue)
+            end
+        end
+
+        cmdTextBox.Text = "" -- Clear the input box after execution
+    end
+end)
+
+-- Function to handle closing the command list
+closeButton.MouseButton1Click:Connect(function()
+    cmdListFrame.Visible = false
+end)
+
+-- Optional: Focus on the text box when the game starts
+cmdTextBox:CaptureFocus()
